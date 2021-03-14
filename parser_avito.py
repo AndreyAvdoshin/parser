@@ -1,16 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import Cities.cities as cities
 
+gorod = ['yakutsk', 'tomsk', 'tyumen', 'omsk', 'moskva', 'sochi', 'krasnodar', 'novosibirsk',
+        'kursk', 'sankt-peterburg', 'voronezh', 'ufa']
 
-XLS = './avito.xlsx'
 HOST = 'https://www.avito.ru'
-URL2 = 'https://www.avito.ru/yakutsk/igry_pristavki_i_programmy/igry_dlya_pristavok-ASgBAgICAUSSAsYJ?cd=1'
-URL = 'https://www.avito.ru/yakutsk/igry_pristavki_i_programmy/igry_dlya_pristavok-ASgBAgICAUSSAsYJ?cd=1&s=104'
 HEADERS = {
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'
-}
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'
+        }
 
 def get_html(url, params=''):
     r = requests.get(url, headers=HEADERS, params=params)
@@ -32,7 +32,7 @@ def get_content(html):
     ad =[]
     title, links, coasts = [], [], []
 
-    n = '/yakutsk'
+    n = '/' + gorod
     for i in range(len(ad1)):
         if n in ad1[i]['link_product']:
             ad.append(ad1[i])
@@ -55,7 +55,10 @@ def get_content(html):
     writer.sheets['Лист1'].set_column('C:C', 20)
 
     writer.save()
-  
-html = get_html(URL)
-get_content(html)
 
+for city in gorod:
+    XLS = cities.goroda[city]['XLS']
+    gorod = cities.goroda[city]['NAME']
+
+    html = get_html(cities.goroda[city]['URL'])
+    get_content(html)

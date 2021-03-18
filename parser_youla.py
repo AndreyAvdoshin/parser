@@ -1,16 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
-import xlrd
 import pandas as pd
+import Cities.cities_youla as cities
 
+gorod = ['yakutsk', 'tomsk', 'tyumen', 'omsk', 'moskva', 'sochi', 'krasnodar', 'novosibirsk',
+        'kursk', 'sankt-peterburg', 'voronezh', 'ufa']
 
-XLS = './youla.xlsx'
-HOST = 'https://youla.ru'
-URL = 'https://youla.ru/yakutsk/hobbi-razvlecheniya/igry-dlya-pristavok-i-pk?attributes[term_of_placement][from]=-1%20day&attributes[term_of_placement][to]=now'
+HOST = 'https://www.youla.ru'
 HEADERS = {
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'
-}
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'
+        }
 
 def get_html(url, params=''):
     r = requests.get(url, headers=HEADERS, params=params)
@@ -19,23 +19,20 @@ def get_html(url, params=''):
 def get_content(html):
     soup = BeautifulSoup(html.text, 'html.parser')
     items = soup.findAll('li', class_='product_item')
-
     ad1 = []
-    title = []
-    links = []
-    coasts = []
-    ad = []
 
     for item in items:
         ad1.append(
             {
-                'title': item.find('a').get('title').strip(),
+                'title': item.find('a').get('title'),
                 'link_product':HOST + item.find('a').get('href'),
                 'coast': item.find('div', class_='product_item__description').get_text(strip=True)
             }
         )
+    ad =[]
+    title, links, coasts = [], [], []
 
-    n = '/yakutsk'
+    n = '/' + gorod
     for i in range(len(ad1)):
         if n in ad1[i]['link_product']:
             ad.append(ad1[i])
@@ -58,8 +55,10 @@ def get_content(html):
     writer.sheets['Лист1'].set_column('C:C', 20)
 
     writer.save()
-  
 
-html = get_html(URL)
-get_content(html)
+for city in gorod:
+    XLS = cities.goroda[city]['XLS']
+    gorod = cities.goroda[city]['NAME']
 
+    html = get_html(cities.goroda[city]['URL'])
+    get_content(html)
